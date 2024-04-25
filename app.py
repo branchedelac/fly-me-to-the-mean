@@ -3,7 +3,6 @@ import streamlit as st
 from data_manager import DataManager
 from flight_search import FlightSearch
 from flight_data import FlightData
-from notification_manager import NotificationManager
 
 data_manager = DataManager()
 flight_search = FlightSearch()
@@ -15,9 +14,7 @@ with open("static/style.css") as css:
 st.title("Fly Me To the Mean")
 
 st.header("Helping you plan your international meetup since 2024.")
-st.image(
-    "static/glass_onion_blanc_boarding.jpg"
-)
+st.image("static/glass_onion_blanc_boarding.jpg")
 
 
 with st.form("my_form"):
@@ -34,7 +31,7 @@ with st.form("my_form"):
         submitted = st.form_submit_button("Submit")
 
 if submitted:
-    with st.spinner("Getting your best flights... :sleuth_or_spy:"):
+    with st.spinner(":sleuth_or_spy: Getting your best flights..."):
         st.write("Please enjoy to some music while you wait!")
         st.audio(
             "static/Fly Me To The Moon _Remastered_.mp3",
@@ -49,11 +46,14 @@ if submitted:
         ]
         departure_cities = flight_search.get_city_id(departure_cities)
         all_flights = flight_search.get_cheap_flights(departure_cities)
-        shared_destination_flights = flight_data.filter_common_destinations(all_flights)
+        shared_destination_flights = flight_data.filter_by_shared_destinations(
+            all_flights
+        )
+        best_flights_df = flight_data.structure_flight_data(
+            shared_destination_flights
+        )
         st.write(f"Travelling from {travelling_from}...")
-        
-    st.write("Found your flights! :bulb: ")
+        st.write(":bulb: Found your flights!")
 
-    st.write(
-        f"You could meet in one of the following destinations: {[d for d in destinations]}"
-    )
+    st.write("You could meet in one of the following destinations:")
+    st.dataframe(best_flights_df)

@@ -84,7 +84,7 @@ class FlightSearch:
             json = result.json()
             print(f"{json['_results']} results retrieved for {city['city']}")
             
-            all_flights[city["city_id"]] = json["data"]
+            all_flights[city["city"]] = json["data"]
             
         return all_flights
 
