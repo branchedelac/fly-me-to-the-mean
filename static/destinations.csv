@@ -1,0 +1,15 @@
+city,iataCode,lowestPrice,stopovers
+Paris,PAR,1500,0
+Tokyo,TYO,6000,2
+Sydney,SYD,6000,2
+Istanbul,IST,1500,1
+New York,NYC,3000,1
+Budapest,BUD,700,0
+Windhoek,WDH,4000,1
+Rome,ROM,1000,0
+Prague,PRG,1500,0
+Tbilisi,TBS,2000,1
+London,LON,450,0
+Pisa,PSA,600,0
+Helsinki,HEL,1000,0
+Vienna,VIE,800,0
