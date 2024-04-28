@@ -31,8 +31,10 @@ with st.form("my_form"):
         submitted = st.form_submit_button("Submit")
 
 if submitted:
-    with st.spinner(":sleuth_or_spy: Getting your best flights..."):
-        st.write("Please enjoy to some music while you wait!")
+    with st.spinner(
+        f":sleuth_or_spy: Getting your best flights from: {travelling_from}..."
+    ):
+        st.write("Please enjoy some music while you wait!")
         st.audio(
             "static/Fly Me To The Moon _Remastered_.mp3",
             format="audio/mp3",
@@ -41,19 +43,41 @@ if submitted:
             end_time=None,
             loop=False,
         )
-        departure_cities = [
+        departures_list = [
             {"city": city.strip()} for city in travelling_from.split(",")
         ]
-        departure_cities = flight_search.get_city_id(departure_cities)
-        all_flights = flight_search.get_cheap_flights(departure_cities)
+        st.write("Searching for available flights...")
+        departure_data = flight_search.get_city_id(departures_list)
+        all_flights = flight_search.get_cheap_flights(
+            departure_data, from_date, to_date
+        )
+
+        st.write("Analyzing the results...")
+
         shared_destination_flights = flight_data.filter_by_shared_destinations(
             all_flights
         )
-        best_flights_df = flight_data.structure_flight_data(
-            shared_destination_flights
-        )
-        st.write(f"Travelling from {travelling_from}...")
-        st.write(":bulb: Found your flights!")
 
-    st.write("You could meet in one of the following destinations:")
-    st.dataframe(best_flights_df)
+# Work with the data
+if not shared_destination_flights:
+    st.write("No flights to shared destinations found.")
+else:
+    structured_shared_flights = flight_data.structure_flight_data(
+        shared_destination_flights
+    )
+
+    # Get top five € cheapest flight combinations
+    best_group_deal, best_destination, best_price = flight_data.get_best_group_deal(
+        structured_shared_flights
+    )
+
+    st.divider()
+    st.header(f"Your ideal destination is... {best_destination}!")
+    st.write(
+        f"You can travel there for a total price of €{str(best_price)}, or €{str(round(best_price/len(departures_list), 2))} per person."
+    )
+
+    st.header("Ticket infotrmation")
+    st.dataframe(best_group_deal)
+
+    # Get top five CO2 cheapest flight combinations

@@ -60,19 +60,19 @@ class FlightSearch:
                 )
         return all_results
 
-    def get_cheap_flights(self, departure_cities):
+    def get_cheap_flights(self, departure_cities, date_from, date_to):
         all_flights = {}
         endpoint = f"{self.base_url}/v2/search?query="
         params = {
-            "date_from": (self.today + dt.timedelta(days=7)).strftime("%d/%m/%Y"),
-            "date_to": (self.today + dt.timedelta(days=21)).strftime("%d/%m/%Y"),
-            "price_to": 1000,
+            "date_from": date_from.strftime("%d/%m/%Y"),
+            "date_to": date_to.strftime("%d/%m/%Y"),
+            "price_to": 2000,
             "nights_in_dst_from": 3,
-            "nights_in_dst_to": 10,
+            "nights_in_dst_to": 30,
             "one_for_city": True,
             "one_per_date": True,
             "curr": "EUR",
-            "max_stopovers": 0,
+            "max_stopovers": 5,
             "limit": 500,
         }
         for i, city in enumerate(departure_cities):
