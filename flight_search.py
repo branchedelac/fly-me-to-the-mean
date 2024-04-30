@@ -27,6 +27,19 @@ class FlightSearch:
                 city["city_id"] = city_data["locations"][0]["id"]
         return cities
 
+    def get_coordinates(self, city) -> tuple:
+        endpoint = f"{self.base_url}/locations"
+        query = f"/query?term={city}&location_types=city"
+        response = requests.get(url=endpoint + query, headers=self.headers)
+        print(query)
+        response.raise_for_status()
+        city_data = response.json()
+        if city_data["results_retrieved"] > 0:
+            return (
+                city_data["locations"][0]["location"]["lat"],
+                city_data["locations"][0]["location"]["lon"],
+            )
+
     def get_shared_destinations(self, departure_cities) -> set:
         params = {
             "term": "",
@@ -77,7 +90,7 @@ class FlightSearch:
         }
         for i, city in enumerate(departure_cities):
             params["fly_from"] = city["city_id"]
-            
+
             # Make request
             result = requests.get(endpoint, params=params, headers=self.headers)
             result.raise_for_status()
@@ -89,4 +102,3 @@ class FlightSearch:
                 return {}
 
         return all_flights
-

@@ -105,8 +105,6 @@ class FlightData:
             axis=1,
         )
 
-        print(destination_options)
-
         # Get the cheapest destination
         cheapest_destination = destination_options.sort_values("price").iloc[0]
 

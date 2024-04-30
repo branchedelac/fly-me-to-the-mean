@@ -3,6 +3,8 @@ import streamlit as st
 from data_manager import DataManager
 from flight_search import FlightSearch
 from flight_data import FlightData
+import pandas as pd
+import numpy as np
 
 data_manager = DataManager()
 flight_search = FlightSearch()
@@ -10,8 +12,6 @@ flight_data = FlightData()
 
 with open("static/style.css") as css:
     st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
-
-st.title("Fly Me To the Mean")
 
 st.header("Helping you plan your international meetup since 2024.")
 st.image("static/glass_onion_blanc_boarding.jpg")
@@ -81,6 +81,28 @@ if submitted:
 
                 st.divider()
                 st.header(f"Your ideal destination is... {best_destination}!")
+
+                # Get a map!
+                lats = []
+                lons = []
+                for d in departures_list:
+                    lat, lon = flight_search.get_coordinates(d["city"])
+                    lats.append(lat)
+                    lons.append(lon)
+
+                lat, lon = flight_search.get_coordinates(best_destination)
+                lats.append(lat)
+                lons.append(lon)
+                print(lats)
+
+                map = pd.DataFrame(
+                    {
+                        "lat": lats,
+                        "lon": lons
+                    }
+                )
+                st.map(map)
+
                 st.write(
                     f"You can travel there for a total price of €{str(best_price)}, or €{str(round(best_price/len(departures_list), 2))} per person."
                 )
@@ -92,16 +114,15 @@ if submitted:
                 st.header(f"Here are the other options!")
                 destination_options_columns = (
                     {
-                        "name": "App name",
-                        "stars": st.column_config.NumberColumn(
-                            "Github Stars",
-                            help="Number of stars on GitHub",
-                            format="%d ⭐",
-                        ),
-                        "url": st.column_config.LinkColumn("App URL"),
-                        "views_history": st.column_config.LineChartColumn(
-                            "Views (past 30 days)", y_min=0, y_max=5000
-                        ),
+                        "city_to": "Destination",
+                        "price": "Price",
+                        "distance": "Distance",
+                        "CO2 (mt)": "CO2 (mt)",
+                        "CO2 (km)": "CO2 (km)",
                     },
                 )
-                st.dataframe(destination_options, column_config=destination_options_columns, hide_index=True)
+                st.dataframe(
+                    destination_options,
+                    column_config=destination_options_columns,
+                    hide_index=True,
+                )
