@@ -4,15 +4,21 @@ from data_manager import DataManager
 from flight_search import FlightSearch
 from flight_data import FlightData
 import pandas as pd
-import numpy as np
 
 data_manager = DataManager()
 flight_search = FlightSearch()
 flight_data = FlightData()
 
+
+st.set_page_config(
+        page_title="Fly Me To the Mean",
+        page_icon="✈️",
+    )
+
 with open("static/style.css") as css:
     st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
-
+    
+st.title("Fly Me To the Mean")
 st.header("Helping you plan your international meetup since 2024.")
 st.image("static/glass_onion_blanc_boarding.jpg")
 
@@ -80,47 +86,36 @@ if submitted:
                 ) = flight_data.get_best_group_deal(structured_shared_flights)
 
                 st.divider()
-                st.header(f"Your ideal destination is... {best_destination}!")
-
-                # Get a map!
-                lats = []
-                lons = []
-                for d in departures_list:
-                    lat, lon = flight_search.get_coordinates(d["city"])
-                    lats.append(lat)
-                    lons.append(lon)
-
-                lat, lon = flight_search.get_coordinates(best_destination)
-                lats.append(lat)
-                lons.append(lon)
-                print(lats)
-
-                map = pd.DataFrame(
-                    {
-                        "lat": lats,
-                        "lon": lons
-                    }
-                )
-                st.map(map)
-
+                st.subheader(f"Your ideal meeting point is... {best_destination}!")
                 st.write(
                     f"You can travel there for a total price of €{str(best_price)}, or €{str(round(best_price/len(departures_list), 2))} per person."
                 )
+                # Create a map!
+                lat, lon = flight_search.get_coordinates(best_destination)
 
-                st.subheader("Ticket infotrmation")
+                map = pd.DataFrame(
+                    {
+                        "lat": [lat, lat + 0.001],
+                        "lon": [lon, lon + 0.001],
+                    }
+                )
+                st.map(map, color="#41B06E", size=70000, zoom=3)
+
+
+                st.header("Ticket infotrmation")
                 st.dataframe(individual_flights, hide_index=True)
 
                 # Dispaly other possible destinations
-                st.header(f"Here are the other options!")
-                destination_options_columns = (
-                    {
+                st.subheader(f"Other options!")
+                destination_options_columns = {
+                        "airport_to": None,
+                        "airport_from": None,
                         "city_to": "Destination",
                         "price": "Price",
                         "distance": "Distance",
                         "CO2 (mt)": "CO2 (mt)",
                         "CO2 (km)": "CO2 (km)",
-                    },
-                )
+                    }
                 st.dataframe(
                     destination_options,
                     column_config=destination_options_columns,

@@ -86,13 +86,13 @@ class FlightData:
 
         # Summarize info for each destination
         destination_options = (
-            deduped_flights.groupby("airport_to")
+            deduped_flights.groupby("city_to")
             .agg(
                 {
                     "airport_from": ", ".join,
                     "price": "sum",
                     "distance": "sum",
-                    "city_to": "first",
+                    "airport_to": "first",
                 }
             )
             .reset_index()
