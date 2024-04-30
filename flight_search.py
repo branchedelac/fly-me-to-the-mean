@@ -67,12 +67,12 @@ class FlightSearch:
             "date_from": date_from.strftime("%d/%m/%Y"),
             "date_to": date_to.strftime("%d/%m/%Y"),
             "price_to": 2000,
-            "nights_in_dst_from": 3,
+            "nights_in_dst_from": 1,
             "nights_in_dst_to": 30,
             "one_for_city": True,
             "one_per_date": True,
             "curr": "EUR",
-            "max_stopovers": 5,
+            "max_stopovers": 0,
             "limit": 500,
         }
         for i, city in enumerate(departure_cities):
@@ -83,8 +83,10 @@ class FlightSearch:
             result.raise_for_status()
             json = result.json()
             print(f"{json['_results']} results retrieved for {city['city']}")
-            
             all_flights[city["city"]] = json["data"]
-            
+
+            if not json["data"]:
+                return {}
+
         return all_flights
 

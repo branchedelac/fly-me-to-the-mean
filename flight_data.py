@@ -1,9 +1,10 @@
 import pandas as pd
+from emission_data import EmissionData
 
 
 class FlightData:
     def __init__(self):
-        pass
+        self.emissions = EmissionData()
 
     def filter_by_shared_destinations(self, flight_data: dict):
         shared_destinations = set()
@@ -63,6 +64,8 @@ class FlightData:
                 "seats": flight["availability"]["seats"],
                 "airlines": " & ".join(flight["airlines"]),
                 "departure": flight["local_departure"][:10],
+                "From": f'{flight["cityFrom"]} ({flight["flyFrom"]})',
+                "To": f'{flight["cityTo"]} ({flight["flyTo"]})',
             }
             structured_flight_data.append(flight_summary)
 
@@ -73,46 +76,48 @@ class FlightData:
     def get_best_group_deal(self, flights: pd.DataFrame) -> tuple:
         # Deduplicate the flights by combination of origin and destination city
         # Keep the cheapest flight for each combination
-        print(flights)
-        deduplicated_flights = (
+        deduped_flights = (
             flights.sort_values(by="price", ascending=True)
             .groupby(["city_from", "city_to"])
             .agg("first")
         ).reset_index()
 
-        deduplicated_flights.sort_values(by=["city_from", "city_to"])
-        print(deduplicated_flights)
+        deduped_flights.sort_values(by=["city_from", "city_to"])
 
-        # Sum the prices for each destination city
-        group_prices = (
-            deduplicated_flights.groupby(["city_to"])
-            .agg({"price": "sum"})
-            .sort_values("price")
+        # Summarize info for each destination
+        destination_options = (
+            deduped_flights.groupby("airport_to")
+            .agg(
+                {
+                    "airport_from": ", ".join,
+                    "price": "sum",
+                    "distance": "sum",
+                    "city_to": "first",
+                }
+            )
             .reset_index()
         )
-        best_destination = group_prices.iloc[0]
-        print(best_destination)
+        # Enrich with CO2 emission data from https://docs.carboninterface.com/#/?id=flight
+        destination_options[["CO2 (mt)", "CO2 (kg)"]] = destination_options.apply(
+            lambda x: self.emissions.get_flight_emissions(
+                x["airport_to"], x["airport_from"]
+            ),
+            axis=1,
+        )
 
-        # Get the individual flights for the top destination
-        group_best_flights = deduplicated_flights.loc[
-            deduplicated_flights["city_to"] == best_destination["city_to"]
+        print(destination_options)
+
+        # Get the cheapest destination
+        cheapest_destination = destination_options.sort_values("price").iloc[0]
+
+        # Get the individual flights for the cheapest destination
+        individual_flights = deduped_flights.loc[
+            deduped_flights["city_to"] == cheapest_destination["city_to"]
         ]
-        print(group_best_flights)
+        print(individual_flights)
 
         # Reorder the columns
-        group_best_flights["From"] = (
-            group_best_flights["city_from"]
-            + " ("
-            + group_best_flights["airport_from"]
-            + ")"
-        )
-        group_best_flights["To"] = (
-            group_best_flights["city_to"]
-            + " ("
-            + group_best_flights["airport_to"]
-            + ")"
-        )
-        group_best_flights = group_best_flights.rename(
+        individual_flights = individual_flights.rename(
             columns={
                 "departure": "Departure date",
                 "distance": "Distance",
@@ -120,13 +125,14 @@ class FlightData:
                 "price": "Ticket price",
             }
         )
-        group_best_flights = group_best_flights[
+        individual_flights = individual_flights[
             ["From", "To", "Departure date", "Ticket price", "Airline(s)", "Distance"]
         ]
 
         # Return
         return (
-            group_best_flights,
-            best_destination["city_to"],
-            best_destination["price"],
+            destination_options,
+            individual_flights,
+            cheapest_destination["city_to"],
+            cheapest_destination["price"],
         )
