@@ -1,5 +1,5 @@
-# Fly Me To the Mean*
-* mean as in average, it's a working title
+# Fly Me To the Mean<sup>1</sup>
+<sup><sup>1</sup> "mean" as in "average", it's a working title... 🙂</sup>
 ## Multi-origin destination and flight search
 ![alt text](static/image.png)
 
