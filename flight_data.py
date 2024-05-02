@@ -98,13 +98,15 @@ class FlightData:
             .reset_index()
         )
         # Enrich with CO2 emission data from https://docs.carboninterface.com/#/?id=flight
-        destination_options[["CO2 (mt)", "CO2 (kg)"]] = destination_options.apply(
+        try:
+            destination_options[["CO2 (mt)", "CO2 (kg)"]] = destination_options.apply(
             lambda x: self.emissions.get_flight_emissions(
                 x["airport_to"], x["airport_from"]
             ),
             axis=1,
         )
-
+        except ValueError as ve:
+            print("Error getting CO2 emissions estimate.", ve)
         # Get the cheapest destination
         cheapest_destination = destination_options.sort_values("price").iloc[0]
 
