@@ -1,8 +1,5 @@
-# Logic
 requests
 numpy
 pandas
 python-dotenv
-
-# User interface
-stramlit
+streamlit
