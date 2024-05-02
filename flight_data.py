@@ -106,7 +106,7 @@ class FlightData:
             axis=1,
         )
         except ValueError as ve:
-            print("Error getting CO2 emissions estimate.", ve)
+            print("Error getting CO2 emissions estimate:", ve)
         # Get the cheapest destination
         cheapest_destination = destination_options.sort_values("price").iloc[0]
 
