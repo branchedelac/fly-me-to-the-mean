@@ -1,4 +1,6 @@
+[server]
 fileWatcherType = "auto"
+
 [theme]
 primaryColor="#FFEFEF"
 backgroundColor="#F6F5F2"
