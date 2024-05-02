@@ -1,5 +1,4 @@
 # Fly Me To the Mean<sup>1</sup>
-<sup><sup>1</sup> "mean" as in "average", it's a working title... 🙂</sup>
 ## Multi-origin destination and flight search
 ![alt text](static/image.png)
 
@@ -15,3 +14,6 @@ The service is built using free versions of the Kiwi Tequila API for flights ✈
 - Add support for multiple passngers per departure
 - Add support for non-direct flights
 - Add support for roundtrips
+
+----
+<sup><sup>1</sup> "mean" as in "average", it's a working title... 🙂</sup>
