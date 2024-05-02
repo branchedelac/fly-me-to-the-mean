@@ -2,4 +2,3 @@ requests
 numpy
 pandas
 python-dotenv
-streamlit
