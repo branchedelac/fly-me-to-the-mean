@@ -6,9 +6,10 @@ The possibility to travel, work remotely, and develop meaningful connections wit
 
 This is where Fly Me To the Mean comes in. Given a set of departure cities and a date range, this service helps you find the destination with the cheapest *total* ticket price, or the cheapest average price per flight/person.
 
-The service is built using free versions of the Kiwi Tequila API for flights ✈️, and the Carbon Interface estimates API for CO2 emission estimates 🍃. The web interface is built using Streamlit.
+The service is built using free versions of the Kiwi Tequila API for flights ✈️, and the Carbon Interface estimates API for CO2 emission estimates 🍃. If the Carbon Interface limit of 200 calls per month has been reached, CO2 estimates are omitted. The web interface is built using Streamlit.
 
 ## Some next steps
+- Improve error handling
 - Make CO2 emission estimate, as well as price, a possible selection criterium 🍃
 - Include departure cities as (optional) possible destinations 🍃
 - Add support for multiple passngers per departure
