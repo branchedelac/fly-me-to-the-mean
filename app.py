@@ -106,7 +106,7 @@ if submitted:
                 st.dataframe(individual_flights, hide_index=True)
 
                 # Dispaly other possible destinations
-                st.subheader(f"Other options!")
+                st.subheader(f"All available destinations")
                 destination_options_columns = {
                         "airport_to": None,
                         "airport_from": None,
