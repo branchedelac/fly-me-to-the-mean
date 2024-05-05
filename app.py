@@ -1,4 +1,3 @@
-import datetime
 import streamlit as st
 from data_manager import DataManager
 from flight_search import FlightSearch
@@ -11,13 +10,13 @@ flight_data = FlightData()
 
 
 st.set_page_config(
-        page_title="Fly Me To the Mean",
-        page_icon="✈️",
-    )
+    page_title="Fly Me To the Mean",
+    page_icon="✈️",
+)
 
 with open("static/style.css") as css:
     st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
-    
+
 st.title("Fly Me To the Mean")
 st.header("Helping you plan your international meetup since 2024.")
 st.image("static/glass_onion_blanc_boarding.jpg")
@@ -88,7 +87,10 @@ if submitted:
                 st.divider()
                 st.subheader(f"Your ideal meeting point is... {best_destination}!")
                 st.write(
-                    f"You can travel there for a total price of €{str(best_price)}, or €{str(round(best_price/len(departures_list), 2))} per person."
+                    f"You can travel there for a total price of: {str(best_price)}€"
+                )
+                st.write(
+                    f"If you split it evenly, the price per person will be: {str(round(best_price/len(departures_list), 2))}€"
                 )
                 # Create a map!
                 lat, lon = flight_search.get_coordinates(best_destination)
@@ -101,23 +103,57 @@ if submitted:
                 )
                 st.map(map, color="#41B06E", size=70000, zoom=3)
 
+                st.header("Flight details")
+                flights_column_order = [
+                    "From",
+                    "To",
+                    "departure",
+                    "stopovers",
+                    "airlines",
+                    "distance",
+                    "price",
+                    "link",
+                ]
+                flights_columns = {
+                    "airport_from": None,
+                    "airport_to": None,
+                    "city_from": None,
+                    "city_to": None,
+                    "From": "From",
+                    "To": "To",
+                    "departure": "Departure",
+                    "arrival": None,
+                    "distance": "Distance",
+                    "stopovers": "Stopovers",
+                    "airlines": "Airlines",
+                    "price": "Price",
+                    "link": st.column_config.LinkColumn(
+                        "Ticket", display_text="More info"
+                    ),
+                }
+                st.dataframe(
+                    individual_flights,
+                    column_config=flights_columns,
+                    hide_index=True,
+                    column_order=flights_column_order,
+                )
 
-                st.header("Ticket infotrmation")
-                st.dataframe(individual_flights, hide_index=True)
-
+                st.divider()
                 # Dispaly other possible destinations
-                st.subheader(f"All available destinations")
-                destination_options_columns = {
-                        "airport_to": None,
-                        "airport_from": None,
-                        "city_to": "Destination",
-                        "price": "Price",
-                        "distance": "Distance",
-                        "CO2 (mt)": "CO2 (mt)",
-                        "CO2 (km)": "CO2 (km)",
-                    }
+                st.write(
+                    "Not what you're looking for? Below is a summary of all the destinations "
+                    "that we were able to find for the selected departure cities and dates."
+                )
+
+                destination_columns = {
+                    "airport_to": None,
+                    "airport_from": None,
+                    "city_to": "Destination",
+                    "price": "Total price",
+                    "distance": "Total distance",
+                }
                 st.dataframe(
                     destination_options,
-                    column_config=destination_options_columns,
+                    column_config=destination_columns,
                     hide_index=True,
                 )

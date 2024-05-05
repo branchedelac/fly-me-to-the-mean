@@ -8,25 +8,31 @@ class FlightData:
 
     def filter_by_shared_destinations(self, flight_data: dict):
         shared_destinations = set()
+        print(shared_destinations)
         best_flights = []
         # Identify destinations available for all origins
-        for city, flights in flight_data.items():
+        for idx, flights in enumerate(flight_data.values()):
             city_destinations = {
                 f["cityTo"] for f in flights if f.get("availability", {}).get("seats")
             }
             # city_destinations.add(city)
-            if shared_destinations:
+            if idx == 0:
+                shared_destinations = city_destinations
+            else:
                 shared_destinations = shared_destinations.intersection(
                     city_destinations
                 )
-            else:
-                shared_destinations = city_destinations
+                
+            
+            # If shared destinations is ever empty at the end of a loop, return
+            print(idx, city_destinations)
+            if len(shared_destinations) == 0:
+                print("No shared destinations found.")
+                return shared_destinations
+            
         print("Found the following shared destinations:", shared_destinations)
         # Loop through the flights again to get all flights heading for those destinations
         print("Getting available flights for shared destinations...")
-        if len(shared_destinations) == 0:
-            print("No shared destinations found.")
-            return shared_destinations
         best_flights = []
         for flights in flight_data.values():
             city_flights = [
@@ -60,10 +66,12 @@ class FlightData:
                 "city_to": flight["cityTo"],
                 "distance": flight["distance"],
                 "price": flight["price"],
-                "nights": flight["nightsInDest"],
+                "stopovers": len(flight["route"]),
                 "seats": flight["availability"]["seats"],
                 "airlines": " & ".join(flight["airlines"]),
                 "departure": flight["local_departure"][:10],
+                "arrival": flight["local_arrival"][:10],
+                "link": flight["deep_link"],
                 "From": f'{flight["cityFrom"]} ({flight["flyFrom"]})',
                 "To": f'{flight["cityTo"]} ({flight["flyTo"]})',
             }
@@ -99,14 +107,17 @@ class FlightData:
         )
         # Enrich with CO2 emission data from https://docs.carboninterface.com/#/?id=flight
         try:
-            destination_options[["CO2 (mt)", "CO2 (kg)"]] = destination_options.apply(
-            lambda x: self.emissions.get_flight_emissions(
-                x["airport_to"], x["airport_from"]
-            ),
-            axis=1,
-        )
+            destination_options["Total CO2 (kg)"] = destination_options.apply(
+                lambda x: self.emissions.get_flight_emissions(
+                    x["airport_to"], x["airport_from"]
+                ),
+                axis=1,
+            )
+            # Drop any empty columns (probably CO2 because I exceeded the API limit)
+            destination_options = destination_options.dropna(axis=1, how="all")
         except ValueError as ve:
             print("Error getting CO2 emissions estimate:", ve)
+            
         # Get the cheapest destination
         cheapest_destination = destination_options.sort_values("price").iloc[0]
 
@@ -115,19 +126,6 @@ class FlightData:
             deduped_flights["city_to"] == cheapest_destination["city_to"]
         ]
         print(individual_flights)
-
-        # Reorder the columns
-        individual_flights = individual_flights.rename(
-            columns={
-                "departure": "Departure date",
-                "distance": "Distance",
-                "airlines": "Airline(s)",
-                "price": "Ticket price",
-            }
-        )
-        individual_flights = individual_flights[
-            ["From", "To", "Departure date", "Ticket price", "Airline(s)", "Distance"]
-        ]
 
         # Return
         return (

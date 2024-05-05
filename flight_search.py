@@ -31,7 +31,6 @@ class FlightSearch:
         endpoint = f"{self.base_url}/locations"
         query = f"/query?term={city}&location_types=city"
         response = requests.get(url=endpoint + query, headers=self.headers)
-        print(query)
         response.raise_for_status()
         city_data = response.json()
         if city_data["results_retrieved"] > 0:
@@ -40,6 +39,40 @@ class FlightSearch:
                 city_data["locations"][0]["location"]["lon"],
             )
 
+    def get_cheap_flights(self, departure_cities, date_from, date_to):
+        all_flights = {}
+        endpoint = f"{self.base_url}/v2/search"
+        params = {
+            "date_from": date_from.strftime("%d/%m/%Y"),
+            "date_to": date_to.strftime("%d/%m/%Y"),
+            "price_to": 2000,
+            "nights_in_dst_from": 1,
+            "nights_in_dst_to": 30,
+            "one_for_city": True,
+            "one_per_date": True,
+            "curr": "EUR",
+            "max_stopovers": 3,
+            "limit": 500,
+        }
+        for city in departure_cities:
+            try:
+                params["fly_from"] = city["city_id"]
+                result = requests.get(endpoint, params=params, headers=self.headers)
+                result.raise_for_status()
+
+                json = result.json()
+                print(f"{json['_results']} results retrieved for {city['city']}")
+                all_flights[city["city"]] = json["data"]
+
+                if not json["data"]:
+                    return {}
+
+            except requests.exceptions.HTTPError as he:
+                print(he)
+
+        return all_flights
+
+    # Not currently used - would result in too many API calls
     def get_shared_destinations(self, departure_cities) -> set:
         params = {
             "term": "",
@@ -72,33 +105,3 @@ class FlightSearch:
                     f"Something went wrong for {city['city_id']}! Status: {response.status_code}"
                 )
         return all_results
-
-    def get_cheap_flights(self, departure_cities, date_from, date_to):
-        all_flights = {}
-        endpoint = f"{self.base_url}/v2/search?query="
-        params = {
-            "date_from": date_from.strftime("%d/%m/%Y"),
-            "date_to": date_to.strftime("%d/%m/%Y"),
-            "price_to": 2000,
-            "nights_in_dst_from": 1,
-            "nights_in_dst_to": 30,
-            "one_for_city": True,
-            "one_per_date": True,
-            "curr": "EUR",
-            "max_stopovers": 0,
-            "limit": 500,
-        }
-        for i, city in enumerate(departure_cities):
-            params["fly_from"] = city["city_id"]
-
-            # Make request
-            result = requests.get(endpoint, params=params, headers=self.headers)
-            result.raise_for_status()
-            json = result.json()
-            print(f"{json['_results']} results retrieved for {city['city']}")
-            all_flights[city["city"]] = json["data"]
-
-            if not json["data"]:
-                return {}
-
-        return all_flights

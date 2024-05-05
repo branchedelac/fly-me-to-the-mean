@@ -1,7 +1,6 @@
 import os
 import requests
 from dotenv import load_dotenv
-import datetime as dt
 import pandas as pd
 
 
@@ -17,22 +16,26 @@ class EmissionData:
             "Authorization": f"Bearer {self.ci_key}",
         }
 
-    def get_flight_emissions(self, destination: str, departures: str) -> dict:
-        endpoint = f"{self.base_url}/estimates"
-        print(f"Getting emission estimate for {departures} -> {destination}")
-        legs = []
-        for departure in departures.split(","):
-            legs.append(
+    def get_flight_emissions(self, destination: str, departures: str) -> pd.Series:
+        try:
+            endpoint = f"{self.base_url}/estimates"
+            print(f"Getting emission estimate for {departures} -> {destination}")
+            legs = []
+            for departure in departures.split(","):
+                legs.append(
                     {
                         "departure_airport": departure.strip(),
                         "destination_airport": destination,
-                    }            )
+                    }
+                )
 
-        body = {"type": "flight", "passengers": 1, "legs": legs}
-        request = requests.post(endpoint, json=body, headers=self.headers)
-        print(request.status_code)
-        if request.status_code >= 400:
-            print(request.text)
-        else:
-            data = request.json()["data"]["attributes"]
-            return pd.Series([data["carbon_mt"],data["carbon_kg"]])
+            body = {"type": "flight", "passengers": 1, "legs": legs}
+
+            result = requests.post(endpoint, json=body, headers=self.headers)
+            result.raise_for_status()
+
+            data = result.json()["data"]["attributes"]
+            return pd.Series([data["carbon_kg"]])
+
+        except requests.exceptions.HTTPError as he:
+            print(he)
