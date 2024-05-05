@@ -31,7 +31,7 @@ with st.form("my_form"):
         )
         from_date = st.date_input(":calendar: Earliest travel date")
         to_date = st.date_input(":calendar: Latest travel date")
-        max_stopovers = st.number_input(
+        max_ppovers = st.number_input(
             ":woman-walking: Maximum number of stopovers", value=0, min_value=0
         )
         city_host = st.toggle(
@@ -132,8 +132,9 @@ if submitted:
                     "From": "From",
                     "To": "To",
                     "departure": "Departure",
+                    "stopovers": "Stopovers"
                     "arrival": None,
-                    "distance": "Stopovers",
+                    "distance": "Distance",
                     "airlines": "Airlines",
                     "price": "Price",
                     "link": st.column_config.LinkColumn(
