@@ -92,17 +92,21 @@ if submitted:
 
                 st.divider()
                 st.subheader(f"Your ideal meeting point is... {best_destination}!")
-                if best_destination == travelling_from:
+
+                st.write(
+                    f"Total price of the trip: {str(best_price)}€"
+                )
+                st.write(
+                    f"Avergage price per person: {str(round(best_price/len(departures_list)))}€"
+                )
+                
+                if best_destination in [c.strip() for c in travelling_from.split(",")]:
                     st.write(
-                        "... which is also one of your departure destinations, so one person gets to stay at home."
+                        f"As {best_destination} is also one of your departure destinations, "
+                        "this means one person gets to host the group in their home city."
                     )
-                st.write(
-                    f"You can travel there for a total price of: {str(best_price)}€"
-                )
-                st.write(
-                    f"Avergage price per person: {str(round(best_price/len(departures_list), 2))}€"
-                )
-                # Create a map!
+                    
+                # Display a map with the destination marked out
                 lat, lon = flight_search.get_coordinates(best_destination)
 
                 map = pd.DataFrame(
@@ -149,6 +153,7 @@ if submitted:
                 )
 
                 st.divider()
+
                 # Dispaly other possible destinations
                 st.write(
                     "Not what you're looking for? Below is a summary of all the destinations "

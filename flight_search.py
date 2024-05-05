@@ -17,27 +17,36 @@ class FlightSearch:
         self.months_from_today = self.today + dt.timedelta(days=30)
 
     def get_city_id(self, cities) -> dict:
-        endpoint = f"{self.base_url}/locations"
-        for city in cities:
-            query = f"/query?term={city['city']}&location_types=city"
+        try:
+            endpoint = f"{self.base_url}/locations"
+            for city in cities:
+                query = f"/query?term={city['city']}&location_types=city"
+                response = requests.get(url=endpoint + query, headers=self.headers)
+                response.raise_for_status()
+                city_data = response.json()
+                if city_data["results_retrieved"] > 0:
+                    city["city_id"] = city_data["locations"][0]["id"]     
+            return cities
+        
+        except requests.exceptions.HTTPError as he:
+            print(he)
+            print(response.text)
+
+    def get_coordinates(self, city) -> tuple:
+        try:
+            endpoint = f"{self.base_url}/locations"
+            query = f"/query?term={city}&location_types=city"
             response = requests.get(url=endpoint + query, headers=self.headers)
             response.raise_for_status()
             city_data = response.json()
             if city_data["results_retrieved"] > 0:
-                city["city_id"] = city_data["locations"][0]["id"]
-        return cities
-
-    def get_coordinates(self, city) -> tuple:
-        endpoint = f"{self.base_url}/locations"
-        query = f"/query?term={city}&location_types=city"
-        response = requests.get(url=endpoint + query, headers=self.headers)
-        response.raise_for_status()
-        city_data = response.json()
-        if city_data["results_retrieved"] > 0:
-            return (
-                city_data["locations"][0]["location"]["lat"],
-                city_data["locations"][0]["location"]["lon"],
-            )
+                return (
+                    city_data["locations"][0]["location"]["lat"],
+                    city_data["locations"][0]["location"]["lon"],
+                )      
+        except requests.exceptions.HTTPError as he:
+            print(he)
+            print(response.text)
 
     def get_cheap_flights(self, departure_cities, date_from, date_to, max_stopovers: int):
         all_flights = {}
