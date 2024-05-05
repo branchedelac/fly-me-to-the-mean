@@ -132,7 +132,7 @@ if submitted:
                     "From": "From",
                     "To": "To",
                     "departure": "Departure",
-                    "stopovers": "Stopovers"
+                    "stopovers": "Stopovers",
                     "arrival": None,
                     "distance": "Distance",
                     "airlines": "Airlines",
