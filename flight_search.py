@@ -58,6 +58,7 @@ class FlightSearch:
             try:
                 params["fly_from"] = city["city_id"]
                 result = requests.get(endpoint, params=params, headers=self.headers)
+                print(result.request.url)
                 result.raise_for_status()
 
                 json = result.json()
@@ -69,6 +70,8 @@ class FlightSearch:
 
             except requests.exceptions.HTTPError as he:
                 print(he)
+                print(result.text)
+                return {}
 
         return all_flights
 

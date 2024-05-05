@@ -25,8 +25,9 @@ class FlightData:
                 )
                 
             counter += 1
+            print(f"Destinations found for {city}: {city_destinations}")
             # If shared destinations is ever empty at the end of a loop, return
-            print("Shared destinations served by", city, "->", shared_destinations)
+            print("Shared destinations:", shared_destinations)
             if len(shared_destinations) == 0:
                 print("No shared destinations found.")
                 return shared_destinations
@@ -68,7 +69,7 @@ class FlightData:
                 "city_to": flight["cityTo"],
                 "distance": flight["distance"],
                 "price": flight["price"],
-                "stopovers": len(flight["route"]) - 2,
+                "direct": "Yes" if len(flight["route"]) < 3 else "No",
                 "seats": flight["availability"]["seats"],
                 "airlines": " & ".join(flight["airlines"]),
                 "departure": flight["local_departure"][:10],

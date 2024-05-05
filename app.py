@@ -29,10 +29,14 @@ with st.form("my_form"):
         travelling_from = st.text_input(
             label=":airplane: We are travelling from (e.g.: Paris, Berlin)"
         )
-        from_date = st.date_input(":luggage: Earliest travel date")
-        to_date = st.date_input(":luggage: Latest travel date")
-        max_stopovers = st.number_input(":woman-running: Max. number of stopovers", value=0, min_value=0)
-        city_host = st.toggle(":house: Departure cities can also be destinations", value=True)
+        from_date = st.date_input(":calendar: Earliest travel date")
+        to_date = st.date_input(":calendar: Latest travel date")
+        max_stopovers = st.number_input(
+            ":woman-walking: Maximum number of stopovers", value=0, min_value=0
+        )
+        city_host = st.toggle(
+            "Departure cities can also be destinations :house:", value=True
+        )
 
         # Every form must have a submit button.
         submitted = st.form_submit_button("Submit")
@@ -88,6 +92,10 @@ if submitted:
 
                 st.divider()
                 st.subheader(f"Your ideal meeting point is... {best_destination}!")
+                if best_destination == travelling_from:
+                    st.write(
+                        "... which is also one of your departure destinations, so one person gets to stay at home."
+                    )
                 st.write(
                     f"You can travel there for a total price of: {str(best_price)}€"
                 )
@@ -110,7 +118,7 @@ if submitted:
                     "From",
                     "To",
                     "departure",
-                    "stopovers",
+                    "direct",
                     "airlines",
                     "distance",
                     "price",
@@ -126,7 +134,7 @@ if submitted:
                     "departure": "Departure",
                     "arrival": None,
                     "distance": "Distance",
-                    "stopovers": "Stopovers",
+                    "direct": "Direct?",
                     "airlines": "Airlines",
                     "price": "Price",
                     "link": st.column_config.LinkColumn(
