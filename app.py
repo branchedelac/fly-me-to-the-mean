@@ -35,7 +35,7 @@ with st.form("my_form"):
             ":woman-walking: Maximum number of stopovers", value=0, min_value=0
         )
         city_host = st.toggle(
-            "Departure cities can also be destinations :house:", value=True
+            ":house: Departure cities can also be destinations", value=True
         )
 
         # Every form must have a submit button.
@@ -118,7 +118,7 @@ if submitted:
                     "From",
                     "To",
                     "departure",
-                    "direct",
+                    "stopovers",
                     "airlines",
                     "distance",
                     "price",
@@ -133,8 +133,7 @@ if submitted:
                     "To": "To",
                     "departure": "Departure",
                     "arrival": None,
-                    "distance": "Distance",
-                    "direct": "Direct?",
+                    "distance": "Stopovers",
                     "airlines": "Airlines",
                     "price": "Price",
                     "link": st.column_config.LinkColumn(

@@ -69,7 +69,7 @@ class FlightData:
                 "city_to": flight["cityTo"],
                 "distance": flight["distance"],
                 "price": flight["price"],
-                "direct": "Yes" if len(flight["route"]) < 3 else "No",
+                "stopovers": len(flight["route"]) - 1,
                 "seats": flight["availability"]["seats"],
                 "airlines": " & ".join(flight["airlines"]),
                 "departure": flight["local_departure"][:10],
