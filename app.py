@@ -100,7 +100,7 @@ if submitted:
                     f"You can travel there for a total price of: {str(best_price)}€"
                 )
                 st.write(
-                    f"If you split it evenly, the price per person will be: {str(round(best_price/len(departures_list), 2))}€"
+                    f"Avergage price per person: {str(round(best_price/len(departures_list), 2))}€"
                 )
                 # Create a map!
                 lat, lon = flight_search.get_coordinates(best_destination)
