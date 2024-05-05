@@ -11,10 +11,8 @@ The service is built using free versions of the Kiwi Tequila API for flights ✈
 ## Some next steps
 - Improve error handling
 - Make CO2 emission estimate, as well as price, a possible selection criterium 🍃
-- Include departure cities as (optional) possible destinations 🍃
 - Add support for multiple passngers per departure
-- Add support for non-direct flights
-- Add support for roundtrips
+- Add support for roundtrips / understand if the API really differentiates these
 
 ----
 <sup><sup>1</sup> "mean" as in "average", it's a working title... 🙂</sup>
