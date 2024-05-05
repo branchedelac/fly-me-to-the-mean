@@ -6,26 +6,27 @@ class FlightData:
     def __init__(self):
         self.emissions = EmissionData()
 
-    def filter_by_shared_destinations(self, flight_data: dict):
+    def filter_by_shared_destinations(self, flight_data: dict, city_host: bool):
+        counter = 0
         shared_destinations = set()
-        print(shared_destinations)
         best_flights = []
         # Identify destinations available for all origins
-        for idx, flights in enumerate(flight_data.values()):
+        for city, flights in flight_data.items():
             city_destinations = {
                 f["cityTo"] for f in flights if f.get("availability", {}).get("seats")
             }
-            # city_destinations.add(city)
-            if idx == 0:
+            if city_host:
+                city_destinations.add(city)
+            if counter == 0:
                 shared_destinations = city_destinations
             else:
                 shared_destinations = shared_destinations.intersection(
                     city_destinations
                 )
                 
-            
+            counter += 1
             # If shared destinations is ever empty at the end of a loop, return
-            print(idx, city_destinations)
+            print("Shared destinations served by", city, "->", shared_destinations)
             if len(shared_destinations) == 0:
                 print("No shared destinations found.")
                 return shared_destinations
@@ -42,6 +43,7 @@ class FlightData:
                 and f.get("availability", {}).get("seats")
             ]
             best_flights.extend(city_flights)
+
         print(
             "Flights with available seats reachable from all origins", len(best_flights)
         )
@@ -66,7 +68,7 @@ class FlightData:
                 "city_to": flight["cityTo"],
                 "distance": flight["distance"],
                 "price": flight["price"],
-                "stopovers": len(flight["route"]),
+                "stopovers": len(flight["route"]) - 2,
                 "seats": flight["availability"]["seats"],
                 "airlines": " & ".join(flight["airlines"]),
                 "departure": flight["local_departure"][:10],

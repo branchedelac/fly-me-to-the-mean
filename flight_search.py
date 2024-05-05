@@ -39,7 +39,7 @@ class FlightSearch:
                 city_data["locations"][0]["location"]["lon"],
             )
 
-    def get_cheap_flights(self, departure_cities, date_from, date_to):
+    def get_cheap_flights(self, departure_cities, date_from, date_to, max_stopovers: int):
         all_flights = {}
         endpoint = f"{self.base_url}/v2/search"
         params = {
@@ -51,7 +51,7 @@ class FlightSearch:
             "one_for_city": True,
             "one_per_date": True,
             "curr": "EUR",
-            "max_stopovers": 3,
+            "max_stopovers": max_stopovers,
             "limit": 500,
         }
         for city in departure_cities:

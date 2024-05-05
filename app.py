@@ -31,6 +31,8 @@ with st.form("my_form"):
         )
         from_date = st.date_input(":luggage: Earliest travel date")
         to_date = st.date_input(":luggage: Latest travel date")
+        max_stopovers = st.number_input(":woman-running: Max. number of stopovers", value=0, min_value=0)
+        city_host = st.toggle(":house: Departure cities can also be destinations", value=True)
 
         # Every form must have a submit button.
         submitted = st.form_submit_button("Submit")
@@ -55,7 +57,7 @@ if submitted:
         departure_data = flight_search.get_city_id(departures_list)
 
         all_flights = flight_search.get_cheap_flights(
-            departure_data, from_date, to_date
+            departure_data, from_date, to_date, max_stopovers
         )
 
         if not all_flights:
@@ -65,7 +67,7 @@ if submitted:
             st.write("Analyzing the results...")
 
             shared_destination_flights = flight_data.filter_by_shared_destinations(
-                all_flights
+                all_flights, city_host
             )
 
             # Work with the data
