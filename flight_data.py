@@ -5,6 +5,7 @@ from emission_data import EmissionData
 class FlightData:
     def __init__(self):
         self.emissions = EmissionData()
+        self.get_co_estimates = False
 
     def filter_by_shared_destinations(self, flight_data: dict, city_host: bool):
         counter = 0
@@ -25,9 +26,7 @@ class FlightData:
                 )
                 
             counter += 1
-            print(f"Destinations found for {city}: {city_destinations}")
             # If shared destinations is ever empty at the end of a loop, return
-            print("Shared destinations:", shared_destinations)
             if len(shared_destinations) == 0:
                 print("No shared destinations found.")
                 return shared_destinations
@@ -109,17 +108,18 @@ class FlightData:
             .reset_index()
         )
         # Enrich with CO2 emission data from https://docs.carboninterface.com/#/?id=flight
-        try:
-            destination_options["Total CO2 (kg)"] = destination_options.apply(
-                lambda x: self.emissions.get_flight_emissions(
-                    x["airport_to"], x["airport_from"]
-                ),
-                axis=1,
-            )
-            # Drop any empty columns (probably CO2 because I exceeded the API limit)
-            destination_options = destination_options.dropna(axis=1, how="all")
-        except ValueError as ve:
-            print("Error getting CO2 emissions estimate:", ve)
+        if self.get_co_estimates:
+            try:
+                destination_options["Total CO2 (kg)"] = destination_options.apply(
+                    lambda x: self.emissions.get_flight_emissions(
+                        x["airport_to"], x["airport_from"]
+                    ),
+                    axis=1,
+                )
+                # Drop any empty columns (probably CO2 because I exceeded the API limit)
+                destination_options = destination_options.dropna(axis=1, how="all")
+            except ValueError as ve:
+                print("Error getting CO2 emissions estimate:", ve)
             
         # Get the cheapest destination
         cheapest_destination = destination_options.sort_values("price").iloc[0]

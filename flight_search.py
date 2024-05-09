@@ -2,6 +2,7 @@ import os
 import requests
 from dotenv import load_dotenv
 import datetime as dt
+import urllib
 
 
 class FlightSearch:
@@ -18,37 +19,53 @@ class FlightSearch:
 
     def get_city_id(self, cities) -> dict:
         try:
-            endpoint = f"{self.base_url}/locations"
+            endpoint = f"{self.base_url}/locations/query"
             for city in cities:
-                query = f"/query?term={city['city']}&location_types=city"
-                response = requests.get(url=endpoint + query, headers=self.headers)
+                params = {"term": city["city"]}
+                response = requests.get(
+                    url=endpoint,
+                    params=urllib.parse.urlencode(params),
+                    headers=self.headers,
+                )
                 response.raise_for_status()
                 city_data = response.json()
                 if city_data["results_retrieved"] > 0:
-                    city["city_id"] = city_data["locations"][0]["id"]     
+                    city["city_id"] = city_data["locations"][0]["id"]
+                else:
+                    print(f"Unable to find city: {city}")
+                    print(city_data)
             return cities
-        
+
         except requests.exceptions.HTTPError as he:
             print(he)
             print(response.text)
 
     def get_coordinates(self, city) -> tuple:
         try:
-            endpoint = f"{self.base_url}/locations"
-            query = f"/query?term={city}&location_types=city"
-            response = requests.get(url=endpoint + query, headers=self.headers)
+            endpoint = f"{self.base_url}/locations/query"
+            params = {"term": city}
+            response = requests.get(
+                url=endpoint,
+                params=urllib.parse.urlencode(params),
+                headers=self.headers,
+            )
             response.raise_for_status()
             city_data = response.json()
             if city_data["results_retrieved"] > 0:
                 return (
                     city_data["locations"][0]["location"]["lat"],
                     city_data["locations"][0]["location"]["lon"],
-                )      
+                )
+            else:
+                print(f"Unable to find city: {city}")
+                print(city_data)
+                
         except requests.exceptions.HTTPError as he:
-            print(he)
-            print(response.text)
+            print(he, "\t", response.text)
 
-    def get_cheap_flights(self, departure_cities, date_from, date_to, max_stopovers: int):
+    def get_cheap_flights(
+        self, departure_cities, date_from, date_to, max_stopovers: int
+    ):
         all_flights = {}
         endpoint = f"{self.base_url}/v2/search"
         params = {
@@ -64,19 +81,20 @@ class FlightSearch:
             try:
                 params["fly_from"] = city["city_id"]
                 result = requests.get(endpoint, params=params, headers=self.headers)
-                print(result.request.url)
                 result.raise_for_status()
 
                 json = result.json()
-                print(f"{json['_results']} results retrieved for {city['city']}")
+                print(f"{json['_results']} flights retrieved for {city['city']}")
                 all_flights[city["city"]] = json["data"]
 
                 if not json["data"]:
                     return {}
 
             except requests.exceptions.HTTPError as he:
-                print(he)
-                print(result.text)
+                print(he, "\t", result.text)
+                return {}
+            except KeyError as ke:
+                print(ke)
                 return {}
 
         return all_flights

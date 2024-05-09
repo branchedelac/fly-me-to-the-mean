@@ -25,14 +25,16 @@ st.image("static/glass_onion_blanc_boarding.jpg")
 with st.form("my_form"):
     with st.sidebar:
         st.write(
-            "From where, and when, would you and your friends like to travel?"
+            "From which cities, and when, would you and your friends like to travel?"
         )
 
         travelling_from = st.text_input(
-            label=":airplane: We are travelling from (e.g.: Paris, Berlin)"
+            label=":airplane: We are travelling from",
+            placeholder="E.g. Paris, Lisbon, Helsinki",
+            help="Enter a comma-separated list of two or more cities.",
         )
-        from_date = st.date_input(":calendar: Earliest travel date")
-        to_date = st.date_input(":calendar: Latest travel date")
+        from_date = st.date_input(":calendar: Earliest departure date")
+        to_date = st.date_input(":calendar: Latest departure date")
         max_stopovers = st.number_input(
             ":woman-walking: Maximum number of stopovers", value=0, min_value=0
         )
@@ -47,6 +49,10 @@ if submitted:
     departures_list = [{"city": city.strip()} for city in travelling_from.split(",")]
     if len(departures_list) < 2:
         st.write(":airplane: Ooops! Please specify at least two departure cities.")
+    elif from_date > to_date:
+        st.write(
+            ":calendar: Ooops! Make sure that your earliest departure date is earlier than your latest departure date."
+        )
     else:
         with st.spinner(
             f":sleuth_or_spy: Getting your best flights from: {travelling_from}..."
@@ -62,6 +68,7 @@ if submitted:
             )
 
             st.write("Searching for available flights...")
+
             departure_data = flight_search.get_city_id(departures_list)
 
             all_flights = flight_search.get_cheap_flights(
@@ -72,8 +79,6 @@ if submitted:
                 st.write("No flights to shared destinations found for these dates.")
 
             else:
-                st.write("Analyzing the results...")
-
                 shared_destination_flights = flight_data.filter_by_shared_destinations(
                     all_flights, city_host
                 )
@@ -94,6 +99,7 @@ if submitted:
                         best_price,
                     ) = flight_data.get_best_group_deal(structured_shared_flights)
 
+                    # Display the result
                     st.divider()
                     st.subheader(f"Your ideal meeting point is... {best_destination}!")
 
